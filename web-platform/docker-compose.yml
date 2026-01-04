@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: c-judge-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cjudge
+      POSTGRES_PASSWORD: cjudge_dev_password
+      POSTGRES_DB: cjudge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - judge_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cjudge -d cjudge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 判题服务
+  judge:
+    build:
+      context: ./judge
+      dockerfile: Dockerfile
+    container_name: c-judge-service
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      # 挂载完整题目资源目录（含答案，供判题使用）
+      - ../:/resources:ro
+      # 挂载学生版资源目录（无答案，供初始化使用）
+      - ../student_resources:/student_resources:ro
+      # 挂载临时提交目录
+      - ./tmp/submissions:/workspace
+      # 挂载判题脚本（开发时方便调试）
+      - ./judge:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://cjudge:cjudge_dev_password@postgres:5432/cjudge
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - judge_network
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+
+networks:
+  judge_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

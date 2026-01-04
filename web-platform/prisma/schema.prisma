@@ -1,0 +1,424 @@
+// Prisma Schema for C Programming Judge
+// 学生通过邀请码加入课程
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// 枚举类型
+// ============================================================
+
+enum UserRole {
+  admin
+  teacher
+  student
+
+  @@map("user_role")
+}
+
+enum InviteType {
+  teacher
+  student
+
+  @@map("invite_type")
+}
+
+enum ProblemType {
+  text_exact
+  compile_run
+  code_with_grader
+  link_object
+  makefile_project
+  reading
+  testgen
+  project
+  quiz
+
+  @@map("problem_type")
+}
+
+enum DisplayType {
+  standard
+  multi_file
+  reading
+  testgen
+  quiz
+
+  @@map("display_type")
+}
+
+enum DifficultyLevel {
+  beginner
+  basic
+  intermediate
+  advanced
+  fun
+
+  @@map("difficulty_level")
+}
+
+enum SubmissionStatus {
+  pending
+  running
+  accepted
+  wrong_answer
+  compile_error
+  runtime_error
+  time_limit_exceeded
+  system_error
+
+  @@map("submission_status")
+}
+
+// ============================================================
+// 用户系统
+// ============================================================
+
+model User {
+  id           String    @id @default(uuid())
+  studentId    String?   @unique @map("student_id") @db.VarChar(50)
+  username     String    @unique @db.VarChar(100)
+  email        String?   @db.VarChar(200)
+  passwordHash String    @default("") @map("password_hash") @db.VarChar(255)
+  displayName  String?   @map("display_name") @db.VarChar(100)
+  className    String?   @map("class_name") @db.VarChar(100) // 班级名称（仅文本，用于分组统计）
+  role         UserRole  @default(student)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  lastLoginAt  DateTime? @map("last_login_at")
+
+  sessions           UserSession[]
+  coursesTaught      Course[]         @relation("TeacherCourses")
+  inviteCodesCreated InviteCode[]     @relation("CreatedInvites")
+  courseStudents     CourseStudent[]
+  submissions        Submission[]
+  learningSessions   LearningSession[]
+
+  @@index([role])
+  @@index([studentId])
+  @@index([className])
+  @@map("users")
+}
+
+model InviteCode {
+  id         String     @id @default(uuid())
+  code       String     @unique @db.VarChar(20)
+  inviteType InviteType @map("invite_type")
+  createdBy  String?    @map("created_by")
+  courseId   String?    @map("course_id") // 关联到课程
+  maxUses    Int        @default(1) @map("max_uses")
+  usedCount  Int        @default(0) @map("used_count")
+  expiresAt  DateTime?  @map("expires_at")
+  isActive   Boolean    @default(true) @map("is_active")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  creator User?   @relation("CreatedInvites", fields: [createdBy], references: [id])
+  course  Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([code])
+  @@index([courseId])
+  @@map("invite_codes")
+}
+
+model UserSession {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique @db.VarChar(255)
+  expiresAt DateTime @map("expires_at")
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("user_sessions")
+}
+
+// ============================================================
+// 课程系统
+// ============================================================
+
+model Course {
+  id             String    @id @default(uuid())
+  code           String    @unique @db.VarChar(50)
+  name           String    @db.VarChar(200)
+  description    String?
+  teacherId      String    @map("teacher_id")
+  // 时间控制
+  startDate      DateTime? @map("start_date") @db.Date
+  endDate        DateTime? @map("end_date") @db.Date
+  dailyStartTime DateTime? @map("daily_start_time") @db.Time()
+  dailyEndTime   DateTime? @map("daily_end_time") @db.Time()
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  teacher          User              @relation("TeacherCourses", fields: [teacherId], references: [id])
+  students         CourseStudent[]
+  inviteCodes      InviteCode[]
+  stages           Stage[]
+  problemSchedules ProblemSchedule[]
+  submissions      Submission[]
+
+  @@index([teacherId])
+  @@map("courses")
+}
+
+// 课程学生关联表（学生通过邀请码加入课程）
+model CourseStudent {
+  id        String   @id @default(uuid())
+  courseId  String   @map("course_id")
+  studentId String   @map("student_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, studentId])
+  @@index([courseId])
+  @@index([studentId])
+  @@map("course_students")
+}
+
+// ============================================================
+// 课程内容
+// ============================================================
+
+model Stage {
+  id          String   @id
+  courseId    String?  @map("course_id")
+  title       String   @db.VarChar(200)
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  course  Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  modules Module[]
+
+  @@index([courseId])
+  @@map("stages")
+}
+
+model Module {
+  id          String   @id
+  stageId     String   @map("stage_id")
+  title       String   @db.VarChar(200)
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  stage    Stage     @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  problems Problem[]
+
+  @@map("modules")
+}
+
+model Problem {
+  id            String          @id
+  moduleId      String?         @map("module_id")
+  title         String          @db.VarChar(200)
+  descriptionZh String?         @map("description_zh")
+  descriptionEn String?         @map("description_en")
+  problemType   ProblemType     @map("problem_type")
+  displayType   DisplayType     @default(standard) @map("display_type")
+  difficulty    DifficultyLevel @default(basic)
+  points        Int             @default(10)
+  editableFiles Json            @default("[]") @map("editable_files")
+  readonlyFiles Json            @default("[]") @map("readonly_files")
+  learningGoals Json?           @map("learning_goals")
+  hints         Json?
+  resourcePath  String?         @map("resource_path") @db.VarChar(200)
+  sortOrder     Int             @default(0) @map("sort_order")
+  isActive      Boolean         @default(true) @map("is_active")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @default(now()) @updatedAt @map("updated_at")
+
+  module           Module?           @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  judgeConfig      JudgeConfig?
+  quizConfig       QuizConfig?
+  submissions      Submission[]
+  problemSchedules ProblemSchedule[]
+
+  @@index([moduleId])
+  @@map("problems")
+}
+
+model ProblemSchedule {
+  id        String    @id @default(uuid())
+  problemId String    @map("problem_id")
+  courseId  String    @map("course_id")
+  startTime DateTime? @map("start_time")
+  endTime   DateTime? @map("end_time")
+  isActive  Boolean   @default(true) @map("is_active")
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, courseId])
+  @@index([problemId])
+  @@index([courseId])
+  @@map("problem_schedules")
+}
+
+// ============================================================
+// 判题配置
+// ============================================================
+
+model JudgeConfig {
+  problemId      String   @id @map("problem_id")
+  config         Json     @default("{}")
+  mainFile       String?  @map("main_file") @db.VarChar(100)
+  compileCmd     String?  @map("compile_cmd")
+  expectedOutput String?  @map("expected_output")
+  graderCode     String?  @map("grader_code")
+  testCases      Json     @default("[]") @map("test_cases")
+  timeLimitMs    Int      @default(5000) @map("time_limit_ms")
+  memoryLimitMb  Int      @default(256) @map("memory_limit_mb")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@map("judge_configs")
+}
+
+model QuizConfig {
+  problemId     String   @id @map("problem_id")
+  quizType      String   @map("quiz_type") @db.VarChar(20)
+  prompt        String
+  options       Json?
+  correctAnswer String   @map("correct_answer")
+  explanation   String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_configs")
+}
+
+// ============================================================
+// 提交记录
+// ============================================================
+
+model Submission {
+  id            String           @id @default(uuid())
+  problemId     String           @map("problem_id")
+  userId        String           @map("user_id")
+  courseId      String?          @map("course_id")
+  files         Json
+  status        SubmissionStatus @default(pending)
+  score         Int              @default(0)
+  logs          Json             @default("[]")
+  submittedAt   DateTime         @default(now()) @map("submitted_at")
+  judgedAt      DateTime?        @map("judged_at")
+  compileTimeMs Int?             @map("compile_time_ms")
+  runTimeMs     Int?             @map("run_time_ms")
+  memoryKb      Int?             @map("memory_kb")
+
+  problem Problem @relation(fields: [problemId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  course  Course? @relation(fields: [courseId], references: [id])
+
+  @@index([problemId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([submittedAt(sort: Desc)])
+  @@map("submissions")
+}
+
+// ============================================================
+// 学习行为追踪
+// ============================================================
+
+model LearningSession {
+  id                String    @id @default(uuid())
+  userId            String?   @map("user_id")
+  sessionToken      String    @unique @map("session_token") @db.VarChar(100)
+  startedAt         DateTime  @default(now()) @map("started_at")
+  endedAt           DateTime? @map("ended_at")
+  totalDurationSec  Int       @default(0) @map("total_duration_sec")
+  activeDurationSec Int       @default(0) @map("active_duration_sec")
+  idleDurationSec   Int       @default(0) @map("idle_duration_sec")
+  tabSwitches       Int       @default(0) @map("tab_switches")
+  focusLostCount    Int       @default(0) @map("focus_lost_count")
+  mouseClicks       Int       @default(0) @map("mouse_clicks")
+  keyPresses        Int       @default(0) @map("key_presses")
+  scrollCount       Int       @default(0) @map("scroll_count")
+  pagesVisited      Int       @default(0) @map("pages_visited")
+  problemsAttempted Int       @default(0) @map("problems_attempted")
+  problemsSolved    Int       @default(0) @map("problems_solved")
+  userAgent         String?   @map("user_agent")
+  screenWidth       Int?      @map("screen_width")
+  screenHeight      Int?      @map("screen_height")
+  ipHash            String?   @map("ip_hash") @db.VarChar(64)
+
+  user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pageVisits     PageVisit[]
+  behaviorEvents BehaviorEvent[]
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@map("learning_sessions")
+}
+
+model PageVisit {
+  id                 String    @id @default(uuid())
+  sessionId          String    @map("session_id")
+  pagePath           String    @map("page_path") @db.VarChar(500)
+  problemId          String?   @map("problem_id") @db.VarChar(50)
+  enteredAt          DateTime  @default(now()) @map("entered_at")
+  leftAt             DateTime? @map("left_at")
+  durationSec        Int       @default(0) @map("duration_sec")
+  activeSec          Int       @default(0) @map("active_sec")
+  tabSwitches        Int       @default(0) @map("tab_switches")
+  focusLostCount     Int       @default(0) @map("focus_lost_count")
+  scrollDepthPercent Int       @default(0) @map("scroll_depth_percent")
+  readingCompleted   Boolean   @default(false) @map("reading_completed")
+
+  session        LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  behaviorEvents BehaviorEvent[]
+
+  @@index([sessionId])
+  @@index([problemId])
+  @@map("page_visits")
+}
+
+model BehaviorEvent {
+  id          BigInt   @id @default(autoincrement())
+  sessionId   String   @map("session_id")
+  pageVisitId String?  @map("page_visit_id")
+  eventType   String   @map("event_type") @db.VarChar(50)
+  eventData   Json     @default("{}") @map("event_data")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  session   LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  pageVisit PageVisit?      @relation(fields: [pageVisitId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([eventType])
+  @@map("behavior_events")
+}
+
+// ============================================================
+// 学生代码草稿
+// ============================================================
+
+model CodeDraft {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  problemId   String   @map("problem_id") @db.VarChar(50)
+  files       Json     @default("{}")
+  lastSavedAt DateTime @default(now()) @map("last_saved_at")
+
+  @@unique([userId, problemId])
+  @@index([userId])
+  @@index([problemId])
+  @@map("code_drafts")
+}
