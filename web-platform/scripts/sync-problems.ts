@@ -37,7 +37,6 @@ async function syncProblems() {
           title: stage.title,
           description: stage.description || null,
           sortOrder: stageOrder,
-          isActive: true,
         },
       });
       console.log(`  ✓ 创建阶段: ${stage.id}`);
@@ -86,7 +85,7 @@ async function syncProblems() {
           where: { id: exercise.id },
         });
 
-        const difficultyMap: Record<string, string> = {
+        const difficultyMap: Record<string, "beginner" | "basic" | "intermediate" | "advanced" | "fun"> = {
           入门: "beginner",
           基础: "basic",
           进阶: "intermediate",
@@ -126,50 +125,6 @@ async function syncProblems() {
               points: exercise.points,
               problemType,
               displayType,
-              sortOrder: exerciseOrder,
-            },
-          });
-          updatedCount++;
-        }
-      }
-    }
-  }
-
-  console.log(`\n✅ 同步完成！`);
-  console.log(`   创建: ${createdCount} 个题目`);
-  console.log(`   更新: ${updatedCount} 个题目`);
-
-  await prisma.$disconnect();
-  await pool.end();
-}
-
-syncProblems().catch((e) => {
-  console.error("同步失败:", e);
-  process.exit(1);
-});
-
-              sortOrder: exerciseOrder,
-            },
-          });
-          updatedCount++;
-        }
-      }
-    }
-  }
-
-  console.log(`\n✅ 同步完成！`);
-  console.log(`   创建: ${createdCount} 个题目`);
-  console.log(`   更新: ${updatedCount} 个题目`);
-
-  await prisma.$disconnect();
-  await pool.end();
-}
-
-syncProblems().catch((e) => {
-  console.error("同步失败:", e);
-  process.exit(1);
-});
-
               sortOrder: exerciseOrder,
             },
           });

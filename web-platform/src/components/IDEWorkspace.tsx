@@ -359,7 +359,7 @@ export default function IDEWorkspace({
         </div>
 
         <div className="flex items-center gap-2">
-          {kind !== "quiz" && kind !== "intro" && (
+          {kind !== "quiz" && (kind as string) !== "intro" && (
             <div className="flex items-center gap-2 text-xs text-slate-400">
               {saveStatus === "saving" && (
                 <>

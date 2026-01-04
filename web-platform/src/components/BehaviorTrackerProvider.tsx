@@ -1,12 +1,12 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useBehaviorTracker } from "@/hooks/useBehaviorTracker";
+import { useBehaviorTracker, BehaviorEventType } from "@/hooks/useBehaviorTracker";
 import { createContext, useContext, ReactNode } from "react";
 
 // 追踪器上下文
 interface TrackerContextValue {
-  trackEvent: (type: string, data?: Record<string, unknown>) => void;
+  trackEvent: (type: BehaviorEventType, data?: Record<string, unknown>) => void;
   getStats: () => { session: Record<string, unknown>; page: Record<string, unknown> };
   flush: () => Promise<void>;
 }

@@ -16,7 +16,7 @@ export type QuizKind = 'single' | 'true_false' | 'fill';
  * - testgen: 测试生成（学生编写测试输入）
  * - project: 综合项目
  */
-export type DisplayType = 'standard' | 'multi_file' | 'reading' | 'testgen' | 'project';
+export type DisplayType = 'standard' | 'multi_file' | 'reading' | 'testgen' | 'project' | 'unittest' | 'gdb';
 
 export interface ProblemMeta {
   id: string;

@@ -22,10 +22,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         teacher: {
           select: { id: true, displayName: true, username: true },
         },
-        classes: {
+        students: {
           include: {
-            _count: { select: { students: true } },
+            student: {
+              select: { id: true, displayName: true, username: true, studentId: true },
+            },
           },
+        },
+        _count: {
+          select: { students: true },
         },
       },
     });
@@ -98,7 +103,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // 验证课程存在
     const course = await prisma.course.findUnique({
       where: { id },
-      include: { classes: true },
+      include: { students: true },
     });
 
     if (!course) {

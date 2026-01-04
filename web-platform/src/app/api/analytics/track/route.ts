@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
           sessionId: session.id,
           pageVisitId: latestVisit?.id,
           eventType: event.type,
-          eventData: event.data || {},
+          eventData: (event.data || {}) as object,
           createdAt: new Date(event.timestamp),
         })),
       });
