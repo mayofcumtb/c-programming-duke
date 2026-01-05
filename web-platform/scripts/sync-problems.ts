@@ -3,7 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import { courseStages } from "../src/lib/courses";
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://cjudge:cjudge_dev_password@localhost:5432/cjudge";
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://cjudge:buubuu1234567890!@localhost:5432/cjudge";
 
 const pool = new pg.Pool({
   connectionString: DATABASE_URL,
