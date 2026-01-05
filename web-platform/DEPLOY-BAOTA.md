@@ -251,30 +251,40 @@ npm run build
 
 ### 4. 使用 PM2 启动应用
 
-**方式一：通过宝塔 PM2 管理器**
+项目已包含 `ecosystem.config.js` 配置文件，可以直接使用。
+
+**方式一：通过宝塔 PM2 管理器（推荐）**
 
 1. 打开宝塔面板 → 软件商店 → PM2 管理器 → 设置
 2. 点击「添加项目」
 3. 填写配置：
-   - 项目名称：`c-judge`
-   - 启动文件：`npm`
-   - 参数：`start`
-   - 项目目录：`/www/wwwroot/c-judge/web-platform`
+   - **项目名称**：`c-judge`
+   - **启动文件**：`ecosystem.config.js`
+   - **项目目录**：`/www/wwwroot/c-judge/web-platform`
 4. 点击确定
+
+> ⚠️ **重要**：宝塔 PM2 管理器需要指定 JS 文件，不能使用 `npm` 命令。项目已提供 `ecosystem.config.js` 启动配置。
 
 **方式二：命令行启动**
 
 ```bash
 cd /www/wwwroot/c-judge/web-platform
 
-# 使用 PM2 启动
-pm2 start npm --name "c-judge" -- start
+# 使用 ecosystem 配置启动
+pm2 start ecosystem.config.js
 
 # 保存进程列表
 pm2 save
 
 # 设置开机自启
 pm2 startup
+```
+
+**方式三：直接指定 Next.js 入口文件**
+
+如果 ecosystem.config.js 不可用，可以直接指定：
+```bash
+pm2 start node_modules/next/dist/bin/next --name "c-judge" -- start
 ```
 
 ### 5. 验证应用
