@@ -1431,8 +1431,9 @@ def judge_testgen_advanced(config, work_dir, resource_dir, problem_id):
 
 
 def judge_standard(work_dir, resource_dir, problem_id):
-    """通用判题（fallback）"""
+    """通用判题（fallback）- 未配置的题目只验证编译，不给满分"""
     logs = []
+    logs.append("⚠️ 该题目尚未配置自动评分，仅验证编译")
     
     # 查找 .c 文件
     c_files = glob.glob(os.path.join(work_dir, "*.c"))
@@ -1443,7 +1444,7 @@ def judge_standard(work_dir, resource_dir, problem_id):
     
     # 编译
     logs.append("正在编译 {}...".format(src_file))
-    compile_res = run_command("gcc -o main {}".format(src_file), cwd=work_dir)
+    compile_res = run_command("gcc -o main -Wall -Werror {}".format(src_file), cwd=work_dir)
     if compile_res["exit_code"] != 0:
         return {"status": "compile_error", "score": 0, "logs": logs + ["编译失败:", compile_res["stderr"]]}
     logs.append("✓ 编译成功")
@@ -1453,11 +1454,17 @@ def judge_standard(work_dir, resource_dir, problem_id):
     if run_res["timeout"]:
         return {"status": "time_limit_exceeded", "score": 0, "logs": logs + ["运行超时"]}
     
+    if run_res["exit_code"] != 0:
+        return {"status": "runtime_error", "score": 0, "logs": logs + ["运行时错误，退出码: {}".format(run_res["exit_code"])]}
+    
     logs.append("运行完成")
     logs.append("--- 输出 ---")
     logs.append(run_res["stdout"])
     
-    return {"status": "accepted", "score": 100, "logs": logs}
+    # 未配置的题目只给编译通过分数，需要人工评阅
+    logs.append("")
+    logs.append("📝 此题目需要人工评阅，暂时给予部分分数")
+    return {"status": "pending", "score": 10, "logs": logs}
 
 
 # ============================================================
