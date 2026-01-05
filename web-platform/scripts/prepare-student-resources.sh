@@ -3,9 +3,19 @@
 
 set -e
 
-# 源目录和目标目录
-SOURCE_DIR="/Users/macbook/Code/c-programming-duke"
-TARGET_DIR="/Users/macbook/Code/c-programming-duke/student_resources"
+# 获取脚本所在目录的父目录的父目录作为项目根目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WEB_PLATFORM_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$WEB_PLATFORM_DIR")"
+
+# 源目录和目标目录（自动检测）
+SOURCE_DIR="${PROJECT_ROOT}"
+TARGET_DIR="${PROJECT_ROOT}/student_resources"
+
+echo "📍 项目根目录: $PROJECT_ROOT"
+echo "📍 源目录: $SOURCE_DIR"
+echo "📍 目标目录: $TARGET_DIR"
+echo ""
 
 echo "📁 创建学生资源目录..."
 rm -rf "$TARGET_DIR"

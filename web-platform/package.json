@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync-problems": "npx tsx scripts/sync-problems.ts"
+    "sync-problems": "npx tsx scripts/sync-problems.ts",
+    "prepare-resources": "bash scripts/prepare-student-resources.sh"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
