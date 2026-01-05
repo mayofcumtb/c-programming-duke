@@ -232,6 +232,7 @@ model Problem {
   points        Int             @default(10)
   editableFiles Json            @default("[]") @map("editable_files")
   readonlyFiles Json            @default("[]") @map("readonly_files")
+  initialCode   Json?           @map("initial_code") // 初始代码模板 { "filename": "code content" }
   learningGoals Json?           @map("learning_goals")
   hints         Json?
   resourcePath  String?         @map("resource_path") @db.VarChar(200)

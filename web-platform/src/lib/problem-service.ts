@@ -116,22 +116,30 @@ export async function getProblemContent(problemId: string) {
   const editableFilenames = (problem.editableFiles as string[]) || [];
   const readonlyFilenames = (problem.readonlyFiles as string[]) || [];
   
+  // 数据库中存储的初始代码模板（优先级最高）
+  const dbInitialCode = (problem as { initialCode?: Record<string, string> }).initialCode;
+  
   // 学生版资源路径（无答案）
   const studentDirPath = problem.resourcePath ? path.join(STUDENT_RESOURCES, problem.resourcePath) : null;
   // 原始资源路径（用于只读文件，如 README）
   const originalDirPath = problem.resourcePath ? path.join(PROJECT_ROOT, problem.resourcePath) : null;
 
-  // 读取可编辑文件（优先从学生版资源读取，无答案版本）
+  // 读取可编辑文件
+  // 优先级：1. 数据库 initialCode  2. student_resources  3. 原始目录  4. 默认模板
   const initialFiles: Record<string, string> = {};
   for (const filename of editableFilenames) {
     let content = getDefaultContent(filename);
     
-    // 优先尝试从学生资源目录读取（无答案）
-    if (studentDirPath) {
+    // 1. 优先使用数据库中存储的初始代码
+    if (dbInitialCode && dbInitialCode[filename]) {
+      content = dbInitialCode[filename];
+    }
+    // 2. 尝试从学生资源目录读取（无答案）
+    else if (studentDirPath) {
       try {
         content = await fs.readFile(path.join(studentDirPath, filename), "utf-8");
       } catch {
-        // 如果学生版不存在，回退到原始目录
+        // 3. 如果学生版不存在，回退到原始目录
         if (originalDirPath) {
           try {
             content = await fs.readFile(path.join(originalDirPath, filename), "utf-8");

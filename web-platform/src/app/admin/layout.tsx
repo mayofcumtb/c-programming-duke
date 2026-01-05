@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Users, BookOpen, Home, Ticket, LogOut, Settings, FileText, UserCog } from "lucide-react";
+import { BarChart3, Users, BookOpen, Home, Ticket, LogOut, Settings, FileText, UserCog, Code } from "lucide-react";
 import { getSession, canAccess } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -55,6 +55,9 @@ export default async function AdminLayout({
             </NavLink>
             <NavLink href="/admin/content" icon={<FileText className="h-5 w-5" />}>
               题目内容
+            </NavLink>
+            <NavLink href="/admin/problems" icon={<Code className="h-5 w-5" />}>
+              初始代码管理
             </NavLink>
             {isAdmin && (
               <>

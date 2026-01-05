@@ -1453,6 +1453,25 @@ typedef enum {
     id: 'code_sum_1_to_n',
     displayType: 'standard',
     editableFiles: ['sum.c'],
+    initialCode: {
+      'sum.c': `#include <stdio.h>
+
+int main(void) {
+    int n;
+    // TODO: 读入 n
+    scanf("%d", &n);
+    
+    int sum = 0;
+    // TODO: 使用循环计算 1+2+...+n
+    
+    
+    // TODO: 输出结果
+    printf("%d\\n", sum);
+    
+    return 0;
+}
+`
+    },
     descriptionZh: `# 计算 1+2+...+N
 
 ## 任务描述
@@ -1461,7 +1480,7 @@ typedef enum {
 ## 具体要求
 1. 读入一个正整数 N
 2. 计算 1+2+3+...+N
-3. 输出结果
+3. 输出结果（只输出数字，后面换行）
 
 ## 示例
 \`\`\`
@@ -1479,6 +1498,24 @@ typedef enum {
     id: 'code_factorial',
     displayType: 'standard',
     editableFiles: ['factorial.c'],
+    initialCode: {
+      'factorial.c': `#include <stdio.h>
+
+int main(void) {
+    int n;
+    scanf("%d", &n);
+    
+    long long result = 1;  // 使用 long long 防止溢出
+    // TODO: 使用循环计算 n!
+    // 提示：result = 1 * 2 * 3 * ... * n
+    
+    
+    printf("%lld\\n", result);
+    
+    return 0;
+}
+`
+    },
     descriptionZh: `# 计算阶乘
 
 ## 任务描述
@@ -1505,6 +1542,32 @@ typedef enum {
     id: 'code_is_even',
     displayType: 'standard',
     editableFiles: ['even.c'],
+    initialCode: {
+      'even.c': `#include <stdio.h>
+
+// TODO: 实现 isEven 函数
+// 如果 n 是偶数返回 1，否则返回 0
+int isEven(int n) {
+    // 提示：使用取模运算符 %
+    // 偶数除以 2 余数为 0
+    
+    return 0;  // 请修改此行
+}
+
+int main(void) {
+    int n;
+    scanf("%d", &n);
+    
+    if (isEven(n)) {
+        printf("even\\n");
+    } else {
+        printf("odd\\n");
+    }
+    
+    return 0;
+}
+`
+    },
     descriptionZh: `# 判断奇偶
 
 ## 任务描述
@@ -1518,6 +1581,10 @@ int isEven(int n);
 - 如果 n 是偶数，返回 1
 - 如果 n 是奇数，返回 0
 
+## 输出格式
+- 偶数输出 \`even\`
+- 奇数输出 \`odd\`
+
 ## 提示
 - 偶数除以 2 余数为 0
 - 使用取模运算符 %`,
@@ -1528,6 +1595,34 @@ int isEven(int n);
     id: 'code_is_prime',
     displayType: 'standard',
     editableFiles: ['prime.c'],
+    initialCode: {
+      'prime.c': `#include <stdio.h>
+
+// TODO: 实现 isPrime 函数
+// 如果 n 是素数返回 1，否则返回 0
+int isPrime(int n) {
+    // 提示：
+    // 1. 小于 2 的数不是素数
+    // 2. 检查 n 能否被 2 到 n-1 之间的数整除
+    // 3. 优化：只需检查到 sqrt(n)
+    
+    return 0;  // 请修改此行
+}
+
+int main(void) {
+    int n;
+    scanf("%d", &n);
+    
+    if (isPrime(n)) {
+        printf("prime\\n");
+    } else {
+        printf("not prime\\n");
+    }
+    
+    return 0;
+}
+`
+    },
     descriptionZh: `# 判断素数
 
 ## 任务描述
@@ -1545,6 +1640,10 @@ int isPrime(int n);
 \`\`\`
 - 如果 n 是素数，返回 1
 - 否则，返回 0
+
+## 输出格式
+- 素数输出 \`prime\`
+- 非素数输出 \`not prime\`
 
 ## 提示
 - 1 不是素数

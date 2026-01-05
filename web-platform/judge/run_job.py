@@ -141,6 +141,122 @@ PROBLEM_CONFIG = {
         "type": "gdb_challenge",
         "filename": "input.txt",
         "game_program": "game"
+    },
+    
+    # ============================================================
+    # 新增的基础编程题（带输入输出验证）
+    # ============================================================
+    
+    # 交换两个变量
+    "code_swap_vars": {
+        "type": "io_test",
+        "filename": "swap.c",
+        "test_cases": [
+            {"input": "3 5\n", "expected": "a=5 b=3\n"},
+            {"input": "10 20\n", "expected": "a=20 b=10\n"},
+            {"input": "-1 1\n", "expected": "a=1 b=-1\n"},
+            {"input": "0 0\n", "expected": "a=0 b=0\n"}
+        ]
+    },
+    
+    # 成绩等级判断
+    "code_grade_judge": {
+        "type": "io_test",
+        "filename": "grade.c",
+        "test_cases": [
+            {"input": "95\n", "expected": "A\n"},
+            {"input": "85\n", "expected": "B\n"},
+            {"input": "75\n", "expected": "C\n"},
+            {"input": "65\n", "expected": "D\n"},
+            {"input": "59\n", "expected": "F\n"},
+            {"input": "100\n", "expected": "A\n"},
+            {"input": "0\n", "expected": "F\n"},
+            {"input": "90\n", "expected": "A\n"},
+            {"input": "80\n", "expected": "B\n"},
+            {"input": "70\n", "expected": "C\n"},
+            {"input": "60\n", "expected": "D\n"}
+        ]
+    },
+    
+    # 计算 1+2+...+N
+    "code_sum_1_to_n": {
+        "type": "io_test",
+        "filename": "sum.c",
+        "test_cases": [
+            {"input": "1\n", "expected": "1\n"},
+            {"input": "5\n", "expected": "15\n"},
+            {"input": "10\n", "expected": "55\n"},
+            {"input": "100\n", "expected": "5050\n"},
+            {"input": "0\n", "expected": "0\n"}
+        ]
+    },
+    
+    # 计算阶乘
+    "code_factorial": {
+        "type": "io_test",
+        "filename": "factorial.c",
+        "test_cases": [
+            {"input": "0\n", "expected": "1\n"},
+            {"input": "1\n", "expected": "1\n"},
+            {"input": "5\n", "expected": "120\n"},
+            {"input": "10\n", "expected": "3628800\n"},
+            {"input": "3\n", "expected": "6\n"}
+        ]
+    },
+    
+    # 判断奇偶
+    "code_is_even": {
+        "type": "io_test",
+        "filename": "even.c",
+        "test_cases": [
+            {"input": "2\n", "expected": "even\n"},
+            {"input": "3\n", "expected": "odd\n"},
+            {"input": "0\n", "expected": "even\n"},
+            {"input": "-1\n", "expected": "odd\n"},
+            {"input": "-2\n", "expected": "even\n"},
+            {"input": "100\n", "expected": "even\n"},
+            {"input": "99\n", "expected": "odd\n"}
+        ]
+    },
+    
+    # 判断素数
+    "code_is_prime": {
+        "type": "io_test",
+        "filename": "prime.c",
+        "test_cases": [
+            {"input": "2\n", "expected": "prime\n"},
+            {"input": "3\n", "expected": "prime\n"},
+            {"input": "4\n", "expected": "not prime\n"},
+            {"input": "17\n", "expected": "prime\n"},
+            {"input": "18\n", "expected": "not prime\n"},
+            {"input": "1\n", "expected": "not prime\n"},
+            {"input": "0\n", "expected": "not prime\n"},
+            {"input": "97\n", "expected": "prime\n"}
+        ]
+    },
+    
+    # 用指针交换变量
+    "code_swap_ptr": {
+        "type": "io_test",
+        "filename": "swap_ptr.c",
+        "test_cases": [
+            {"input": "3 5\n", "expected": "a=5 b=3\n"},
+            {"input": "10 20\n", "expected": "a=20 b=10\n"},
+            {"input": "-1 1\n", "expected": "a=1 b=-1\n"},
+            {"input": "0 0\n", "expected": "a=0 b=0\n"}
+        ]
+    },
+    
+    # 数组反转
+    "code_array_reverse": {
+        "type": "io_test",
+        "filename": "reverse.c",
+        "test_cases": [
+            {"input": "5\n1 2 3 4 5\n", "expected": "5 4 3 2 1\n"},
+            {"input": "3\n10 20 30\n", "expected": "30 20 10\n"},
+            {"input": "1\n42\n", "expected": "42\n"},
+            {"input": "4\n1 1 1 1\n", "expected": "1 1 1 1\n"}
+        ]
     }
 }
 
@@ -1430,6 +1546,77 @@ def judge_testgen_advanced(config, work_dir, resource_dir, problem_id):
         return {"status": "wrong_answer", "score": 0, "logs": logs + ["没有有效的测试用例"]}
 
 
+def judge_io_test(config, work_dir, resource_dir, problem_id):
+    """输入输出测试 - 验证程序输出是否符合预期"""
+    logs = []
+    filename = config.get("filename")
+    test_cases = config.get("test_cases", [])
+    
+    if not filename:
+        return {"status": "system_error", "score": 0, "logs": ["配置错误：缺少 filename"]}
+    
+    if not test_cases:
+        return {"status": "system_error", "score": 0, "logs": ["配置错误：缺少测试用例"]}
+    
+    src_file = os.path.join(work_dir, filename)
+    if not os.path.exists(src_file):
+        return {"status": "runtime_error", "score": 0, "logs": ["缺少文件: " + filename]}
+    
+    # 编译
+    logs.append("正在编译 {}...".format(filename))
+    compile_res = run_command(
+        "gcc -o main -Wall -Werror -std=gnu99 {}".format(filename),
+        cwd=work_dir
+    )
+    
+    if compile_res["exit_code"] != 0:
+        return {
+            "status": "compile_error",
+            "score": 0,
+            "logs": logs + ["编译失败:", compile_res["stderr"]]
+        }
+    logs.append("✓ 编译成功")
+    
+    # 运行测试用例
+    passed = 0
+    total = len(test_cases)
+    
+    for i, tc in enumerate(test_cases):
+        input_data = tc.get("input", "")
+        expected = tc.get("expected", "")
+        
+        run_res = run_command("./main", timeout=5, cwd=work_dir, input_data=input_data)
+        
+        if run_res["timeout"]:
+            logs.append("✗ 测试 {}: 超时".format(i + 1))
+            continue
+        
+        if run_res["exit_code"] != 0:
+            logs.append("✗ 测试 {}: 运行时错误 (退出码 {})".format(i + 1, run_res["exit_code"]))
+            continue
+        
+        actual = run_res["stdout"]
+        
+        # 比较输出（去除尾部空白）
+        if actual.rstrip() == expected.rstrip():
+            logs.append("✓ 测试 {}: 通过".format(i + 1))
+            passed += 1
+        else:
+            logs.append("✗ 测试 {}: 输出不匹配".format(i + 1))
+            logs.append("  输入: {}".format(repr(input_data)))
+            logs.append("  期望: {}".format(repr(expected.rstrip())))
+            logs.append("  实际: {}".format(repr(actual.rstrip())))
+    
+    # 计算分数
+    score = int(100 * passed / total) if total > 0 else 0
+    status = "accepted" if passed == total else "wrong_answer"
+    
+    logs.append("")
+    logs.append("通过 {}/{} 个测试".format(passed, total))
+    
+    return {"status": status, "score": score, "logs": logs}
+
+
 def judge_standard(work_dir, resource_dir, problem_id):
     """通用判题（fallback）- 未配置的题目只验证编译，不给满分"""
     logs = []
@@ -1512,6 +1699,9 @@ def judge_submission(problem_id, work_dir, resource_dir):
                 "make_target": "",
                 "test_executable": config.get("test_runner", "run_all.sh")
             }, work_dir, resource_dir, problem_id)
+        elif problem_type == "io_test":
+            # 输入输出测试题
+            return judge_io_test(config, work_dir, resource_dir, problem_id)
         else:
             return judge_standard(work_dir, resource_dir, problem_id)
     except Exception as e:

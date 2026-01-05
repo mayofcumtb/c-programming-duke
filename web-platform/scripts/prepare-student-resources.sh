@@ -276,55 +276,188 @@ size_t maxSeq(int * array, size_t n) {
 EOF
 echo "  ✓ 16_subseq/maxSeq.c"
 
-# c2prj1_cards - 保留函数签名
+# c2prj1_cards - 详细的学生模板
 cat > "$TARGET_DIR/c2prj1_cards/cards.c" << 'EOF'
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "cards.h"
 
-// TODO: 实现以下函数
+/*
+ * 扑克牌项目 - 学生代码模板
+ * 
+ * 请仔细阅读 cards.h 中的类型定义：
+ * - card_t: 包含 value (2-14) 和 suit (SPADES/HEARTS/DIAMONDS/CLUBS)
+ * - VALUE_ACE = 14, VALUE_KING = 13, VALUE_QUEEN = 12, VALUE_JACK = 11
+ * - suit_t: SPADES=0, HEARTS=1, DIAMONDS=2, CLUBS=3
+ */
 
 void assert_card_valid(card_t c) {
-    // 验证卡牌有效性
+    /*
+     * TODO: 验证卡牌有效性
+     * 
+     * 要求：使用 assert() 检查：
+     * 1. c.value 必须在 2 到 VALUE_ACE (14) 之间（包含边界）
+     * 2. c.suit 必须在 SPADES 到 CLUBS 之间（包含边界）
+     * 
+     * 如果卡牌无效，程序应该通过 assert 终止
+     * 
+     * 提示：assert(条件) - 如果条件为假，程序会终止
+     */
+    
+    // 在下面编写你的代码
+    
 }
 
 const char * ranking_to_string(hand_ranking_t r) {
-    // 返回手牌等级的字符串表示
-    return "";
+    /*
+     * TODO: 返回手牌等级的字符串表示
+     * 
+     * 要求：根据 r 的值返回对应的字符串：
+     * - STRAIGHT_FLUSH  -> "STRAIGHT_FLUSH"
+     * - FOUR_OF_A_KIND  -> "FOUR_OF_A_KIND"
+     * - FULL_HOUSE      -> "FULL_HOUSE"
+     * - FLUSH           -> "FLUSH"
+     * - STRAIGHT        -> "STRAIGHT"
+     * - THREE_OF_A_KIND -> "THREE_OF_A_KIND"
+     * - TWO_PAIR        -> "TWO_PAIR"
+     * - PAIR            -> "PAIR"
+     * - NOTHING         -> "NOTHING"
+     * 
+     * 提示：使用 switch-case 语句
+     */
+    
+    // 在下面编写你的代码
+    
+    return "";  // 请修改此行
 }
 
 char value_letter(card_t c) {
-    // 返回卡牌值的字母表示
-    return '?';
+    /*
+     * TODO: 返回卡牌值对应的字符
+     * 
+     * 映射规则：
+     * - 2-9   -> '2'-'9'
+     * - 10    -> '0' (注意：10 用字符 '0' 表示)
+     * - Jack  -> 'J'
+     * - Queen -> 'Q'
+     * - King  -> 'K'
+     * - Ace   -> 'A'
+     * 
+     * 提示：使用 switch-case 语句
+     */
+    
+    // 在下面编写你的代码
+    
+    return '?';  // 请修改此行
 }
 
 char suit_letter(card_t c) {
-    // 返回花色的字母表示
-    return '?';
+    /*
+     * TODO: 返回花色对应的字符
+     * 
+     * 映射规则：
+     * - SPADES   -> 's' (黑桃)
+     * - HEARTS   -> 'h' (红心)
+     * - DIAMONDS -> 'd' (方块)
+     * - CLUBS    -> 'c' (梅花)
+     * 
+     * 提示：使用 switch-case 语句
+     */
+    
+    // 在下面编写你的代码
+    
+    return '?';  // 请修改此行
 }
 
 void print_card(card_t c) {
-    // 打印卡牌
+    /*
+     * TODO: 打印卡牌
+     * 
+     * 格式：两个字符，无换行
+     * 例如：As (黑桃A), 0h (红心10), Kc (梅花K)
+     * 
+     * 提示：调用 value_letter() 和 suit_letter() 函数
+     */
+    
+    // 在下面编写你的代码
+    
 }
 
 card_t card_from_letters(char value_let, char suit_let) {
-    // 从字母创建卡牌
+    /*
+     * TODO: 从字符创建卡牌
+     * 
+     * 参数：
+     * - value_let: '2'-'9', '0'(10), 'J', 'Q', 'K', 'A'
+     * - suit_let: 's', 'h', 'd', 'c'
+     * 
+     * 返回：对应的 card_t 结构体
+     * 
+     * 注意：创建完成后应该调用 assert_card_valid() 验证
+     */
+    
     card_t temp;
+    
+    // 在下面编写你的代码
+    // 1. 根据 value_let 设置 temp.value
+    // 2. 根据 suit_let 设置 temp.suit
+    // 3. 调用 assert_card_valid(temp) 验证
+    
     return temp;
 }
 
 card_t card_from_num(unsigned c) {
-    // 从数字创建卡牌 (0-51)
+    /*
+     * TODO: 从数字 (0-51) 创建卡牌
+     * 
+     * 参数：c 是 0-51 的数字，代表一副牌中的一张
+     * 
+     * 映射方式（你需要设计）：
+     * - 52 张牌需要唯一映射到 0-51
+     * - 建议：使用除法和取余运算
+     * - 例如：c / 4 可以得到 0-12，加 2 得到 value (2-14)
+     *        c % 4 可以得到 0-3，对应四种花色
+     * 
+     * 返回：对应的 card_t 结构体
+     */
+    
     card_t temp;
+    
+    // 在下面编写你的代码
+    
     return temp;
 }
 EOF
-echo "  ✓ c2prj1_cards/cards.c"
+echo "  ✓ c2prj1_cards/cards.c (详细模板)"
 
-# c2prj2_testing - 清空测试文件
-echo "" > "$TARGET_DIR/c2prj2_testing/tests.txt"
-echo "  ✓ c2prj2_testing/tests.txt"
+# c2prj2_testing - 提供详细的测试模板
+cat > "$TARGET_DIR/c2prj2_testing/tests.txt" << 'EOF'
+# ==================================================
+# 扑克牌测试用例 - 学生模板
+# ==================================================
+#
+# 格式：手牌1; 手牌2
+# 每张牌用两个字符表示：值 + 花色
+#   值: 2-9, 0(10), J, Q, K, A
+#   花色: s(黑桃), h(红心), d(方块), c(梅花)
+#
+# 示例：
+#   As Ks Qs Js 0s 9s 8s; 2h 3h 4h 5h 6h 7h 8h
+#   (黑桃皇家同花顺 vs 红心同花顺)
+#
+# 你需要设计测试用例来检测程序中可能的bug，包括：
+# 1. 各种手牌类型的基本测试
+# 2. 边界情况
+# 3. 可能的off-by-one错误
+# 4. 同花顺vs普通同花+普通顺子的区别
+# 5. 两对的正确排序
+#
+# 请删除这些注释行，在下面编写你的测试用例：
+# ==================================================
+
+EOF
+echo "  ✓ c2prj2_testing/tests.txt (详细模板)"
 
 echo ""
 echo "✅ 学生资源准备完成！"

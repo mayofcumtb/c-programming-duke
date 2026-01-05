@@ -1,74 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getSession, canAccess } from "@/lib/auth";
 
-// 获取所有题目
-export async function GET() {
+// 获取所有题目列表（用于管理）
+export async function GET(request: NextRequest) {
   try {
-    if (!prisma.problem) {
-      return NextResponse.json({ problems: [], _warning: "数据库模型未加载" });
+    const session = await getSession();
+    if (!session || !canAccess(session.user, "teacher")) {
+      return NextResponse.json({ error: "无权限" }, { status: 403 });
     }
 
     const problems = await prisma.problem.findMany({
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      orderBy: [{ moduleId: "asc" }, { sortOrder: "asc" }],
       select: {
         id: true,
         title: true,
         problemType: true,
-        displayType: true,
         difficulty: true,
-        points: true,
-        isActive: true,
-        moduleId: true,
+        editableFiles: true,
+        initialCode: true,
+        module: {
+          select: {
+            id: true,
+            title: true,
+            stage: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+          },
+        },
       },
     });
 
-    return NextResponse.json({ problems });
+    // 转换数据格式
+    const result = problems.map((p) => ({
+      id: p.id,
+      title: p.title,
+      problemType: p.problemType,
+      difficulty: p.difficulty,
+      editableFiles: p.editableFiles,
+      hasInitialCode: !!p.initialCode,
+      module: p.module,
+    }));
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("[Admin] Get problems error:", error);
-    return NextResponse.json({ problems: [], error: "获取题目列表失败" });
+    return NextResponse.json({ error: "获取题目列表失败" }, { status: 500 });
   }
 }
-
-// 添加题目
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { id, title, moduleId, problemType, displayType, difficulty, points, descriptionZh } = body;
-
-    if (!id || !title) {
-      return NextResponse.json({ error: "题目ID和标题必填" }, { status: 400 });
-    }
-
-    if (!prisma.problem) {
-      return NextResponse.json({ error: "数据库模型未加载" }, { status: 500 });
-    }
-
-    // 检查是否已存在
-    const existing = await prisma.problem.findUnique({ where: { id } });
-    if (existing) {
-      return NextResponse.json({ error: "题目ID已存在" }, { status: 400 });
-    }
-
-    const problem = await prisma.problem.create({
-      data: {
-        id,
-        title,
-        moduleId: moduleId || null,
-        problemType: problemType || "compile_run",
-        displayType: displayType || "standard",
-        difficulty: difficulty || "basic",
-        points: points || 10,
-        descriptionZh: descriptionZh || "",
-        editableFiles: [],
-        readonlyFiles: [],
-        isActive: true,
-      },
-    });
-
-    return NextResponse.json({ success: true, problem });
-  } catch (error) {
-    console.error("[Admin] Add problem error:", error);
-    return NextResponse.json({ error: "添加题目失败" }, { status: 500 });
-  }
-}
-
