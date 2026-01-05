@@ -84,10 +84,12 @@ export async function POST(request: NextRequest) {
     });
 
     // 设置 cookie
+    // 注意：如果没有使用 HTTPS，需要将 secure 设为 false
+    const isHttps = process.env.HTTPS === "true" || process.env.USE_HTTPS === "true";
     const cookieStore = await cookies();
     cookieStore.set("auth_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttps,
       sameSite: "lax",
       expires: expiresAt,
       path: "/",
