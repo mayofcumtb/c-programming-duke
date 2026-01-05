@@ -105,6 +105,29 @@ Hello World
     id: '02_code1',
     displayType: 'standard',
     editableFiles: ['code1.c'],
+    initialCode: {
+      'code1.c': `#include <stdio.h>
+
+int max(int num1, int num2) {
+  // TODO: 实现这个函数
+  // 返回 num1 和 num2 中较大的那个
+  // 提示：使用 if-else 语句
+  
+  return 0; // 修改这一行
+}
+
+int main(void) {
+  printf("max(42, -69) is %d\\n", max(42, -69));
+  printf("max(33, 0) is %d\\n", max(33, 0));
+  printf("max(0x123456, 123456) is %d\\n", max(0x123456, 123456));
+  
+  // TODO: 计算 0x451215AF 和 0x913591AF 的最大值并打印
+  // 格式: max(0x451215AF, 0x913591AF) is %d\\n
+  
+  return 0;
+}
+`
+    },
     descriptionZh: `# Max 函数实现
 
 ## 任务描述
@@ -142,6 +165,37 @@ max(0x451215AF,0x913591AF) is 1158813103
     id: '03_code2',
     displayType: 'standard',
     editableFiles: ['code2.c'],
+    initialCode: {
+      'code2.c': `#include <stdio.h>
+
+int printTriangle(int size) {
+  // TODO: 实现这个函数
+  // 1. 初始化 starCount = 0
+  // 2. 用嵌套循环打印三角形
+  //    - 外层循环: i 从 0 到 size-1
+  //    - 内层循环: j 从 0 到 i (包含)
+  //    - 每次内循环打印一个 "*"，并给 starCount 加 1
+  //    - 每行结束打印换行符 "\\n"
+  // 3. 返回 starCount
+  
+  return 0; // 修改这里
+}
+
+int main(void) {
+  int numStars;
+  printf("Here is a triangle with height 4\\n");
+  numStars = printTriangle(4);
+  printf("That triangle had %d total stars\\n", numStars);
+  
+  // TODO: 打印 height=7 的三角形
+  // 1. 打印 "Here is a triangle with height 7\\n"
+  // 2. 调用 printTriangle(7)
+  // 3. 打印 "That triangle had %d total stars\\n"
+
+  return 0;
+}
+`
+    },
     descriptionZh: `# 打印三角形
 
 ## 任务描述
@@ -185,6 +239,44 @@ That triangle had 10 total stars
     id: '05_squares',
     displayType: 'standard',
     editableFiles: ['squares.c'],
+    initialCode: {
+      'squares.c': `#include <stdio.h>
+#include <stdlib.h>
+
+// 返回 size1 和 size2 中较大的那个
+int find_max(int size1, int size2) {
+  if (size1 > size2) {
+    return size1;
+  }
+  else {
+    return size2;
+  }
+}
+
+void squares(int size1, int x_offset, int y_offset, int size2) {
+  // TODO: 实现这个函数，绘制两个可能重叠的正方形
+  
+  // 步骤提示:
+  // 1. 计算画布宽度 w = max(size1, x_offset + size2)
+  // 2. 计算画布高度 h = max(size1, y_offset + size2)
+  // 3. 用双重循环遍历每个位置 (x, y)
+  // 4. 对于每个位置，判断:
+  //    - 如果在第二个正方形的边上 -> 打印 '*'
+  //    - 否则如果在第一个正方形的边上 -> 打印 '#'
+  //    - 否则 -> 打印空格 ' '
+  // 5. 每行结束打印换行符
+  
+  // 判断第二个正方形边框:
+  // x 在 [x_offset, x_offset+size2) 且 y 是上边或下边
+  // 或者 y 在 [y_offset, y_offset+size2) 且 x 是左边或右边
+  
+  // 判断第一个正方形边框:
+  // x 在 [0, size1) 且 y 是上边或下边
+  // 或者 y 在 [0, size1) 且 x 是左边或右边
+  
+}
+`
+    },
     descriptionZh: `# 图形打印逻辑
 
 ## 任务描述
@@ -226,6 +318,80 @@ gcc -o squares -Wall -Werror -std=gnu99 -pedantic squares.c squares_test.o
     id: '06_rect',
     displayType: 'standard',
     editableFiles: ['rectangle.c'],
+    initialCode: {
+      'rectangle.c': `#include <stdio.h>
+#include <stdlib.h>
+
+// 辅助函数：返回较小值
+int min(int a, int b) {
+  if (a < b) return a;
+  return b;
+}
+
+// 辅助函数：返回较大值
+int max(int a, int b) {
+  if (a > b) return a;
+  return b;
+}
+
+// TODO: 在这里定义你的矩形结构体
+// 需要包含：x, y, width, height 四个 int 成员
+typedef struct rect {
+  // 在这里添加结构体成员
+} rectangle;
+
+// TODO: 实现 canonicalize 函数
+// 将负的 width/height 转换为正数，并相应调整 x/y
+rectangle canonicalize(rectangle r) {
+  // 如果 width < 0，需要调整 x 并将 width 变为正数
+  // 如果 height < 0，需要调整 y 并将 height 变为正数
+  
+  return r;
+}
+
+// TODO: 实现 intersection 函数
+// 计算两个矩形的交集
+rectangle intersection(rectangle r1, rectangle r2) {
+  rectangle inter_rect;
+  
+  // 步骤提示：
+  // 1. 先规范化两个矩形
+  // 2. 检查是否有交集（如果没有，返回空矩形）
+  // 3. 计算交集矩形的 x, y, width, height
+  
+  return inter_rect;
+}
+
+// 以下代码不需要修改
+void printRectangle(rectangle r) {
+  r = canonicalize(r);
+  if (r.width == 0 && r.height == 0) {
+    printf("<empty>\\n");
+  }
+  else {
+    printf("(%d,%d) to (%d,%d)\\n", r.x, r.y, 
+                               r.x + r.width, r.y + r.height);
+  }
+}
+
+int main(void) {
+  rectangle r1 = {2, 3, 5, 6};
+  rectangle r2 = {4, 5, -5, -7};
+  rectangle r3 = {-2, 7, 7, -10};
+  rectangle r4 = {0, 7, -4, 2};
+
+  printf("r1 is "); printRectangle(r1);
+  printf("r2 is "); printRectangle(r2);
+  printf("r3 is "); printRectangle(r3);
+  printf("r4 is "); printRectangle(r4);
+
+  rectangle i = intersection(r1, r2);
+  printf("intersection(r1,r2): "); printRectangle(i);
+
+  return EXIT_SUCCESS;
+}
+`
+    },
     descriptionZh: `# 矩形几何计算
 
 ## 任务描述
@@ -268,6 +434,64 @@ rectangle intersection(rectangle r1, rectangle r2);
     id: '07_retirement',
     displayType: 'standard',
     editableFiles: ['retirement.c'],
+    initialCode: {
+      'retirement.c': `#include <stdlib.h>
+#include <stdio.h>
+
+// 退休信息结构体（已定义）
+struct _retire_info {
+  int months;            // 月数
+  double contribution;   // 每月存入（工作期）或支出（退休期）
+  double rate_of_return; // 月收益率
+};
+typedef struct _retire_info retire_info;
+
+// 打印月度信息（已提供）
+void print_monthly_info(int months, double balance) {
+  printf("Age %3d month %2d you have $%.2lf\\n", 
+         months / 12, months % 12, balance);
+}
+
+// TODO: 实现 balance_calc 函数
+// 计算一个月后的余额
+// 公式：new_balance = old_balance * (1 + rate_of_return) + contribution
+double balance_calc(double balance, retire_info retire_stats) {
+  // 在这里实现
+  
+  return balance;
+}
+
+// TODO: 实现 retirement 函数
+// 模拟整个储蓄过程：工作期 + 退休期
+void retirement(int startAge, double initial, retire_info working, retire_info retired) {
+  // 步骤提示：
+  // 1. 初始化余额和当前月份
+  // 2. 工作期循环：
+  //    - 打印当前月份的信息 (print_monthly_info)
+  //    - 更新余额 (balance_calc with working)
+  // 3. 退休期循环：
+  //    - 打印当前月份的信息
+  //    - 更新余额 (balance_calc with retired)
+  
+}
+
+int main() {
+  retire_info working;
+  working.months = 489;
+  working.contribution = 1000;
+  working.rate_of_return = 0.045 / 12.0;
+  
+  retire_info retired;
+  retired.months = 384;
+  retired.contribution = -4000;  // 退休后每月支出
+  retired.rate_of_return = 0.01 / 12.0;
+
+  retirement(327, 21345, working, retired);
+
+  return 0;
+}
+`
+    },
     descriptionZh: `# 退休储蓄计算器
 
 ## 任务描述
@@ -275,10 +499,19 @@ rectangle intersection(rectangle r1, rectangle r2);
 
 ## 具体要求
 根据提供的模板，实现退休储蓄的年度模拟：
-- 跟踪每年的储蓄余额
-- 考虑工作期间的存款
-- 考虑退休后的支出
-- 处理通货膨胀等因素
+- 跟踪每月的储蓄余额
+- 工作期间每月存入固定金额
+- 退休后每月支出固定金额
+- 考虑投资收益率
+
+## 核心函数
+
+### balance_calc
+计算一个月后的余额：
+\`new_balance = old_balance * (1 + rate) + contribution\`
+
+### retirement
+模拟整个过程，依次处理工作期和退休期的每个月。
 
 ## 学习目标
 - 复杂业务逻辑实现
@@ -286,8 +519,8 @@ rectangle intersection(rectangle r1, rectangle r2);
 - 循环与条件的综合运用
 
 ## 提示
-- 仔细阅读代码中的注释
-- 注意年份的边界条件`,
+- 注意月份计数从 startAge 开始
+- 先打印信息，再更新余额`,
     learningGoals: ['业务逻辑', '结构体应用', '综合编程']
   },
 
@@ -372,6 +605,61 @@ rectangle intersection(rectangle r1, rectangle r2);
     id: '14_array_max',
     displayType: 'standard',
     editableFiles: ['arrayMax.c'],
+    initialCode: {
+      'arrayMax.c': `#include <stdio.h>
+#include <stdlib.h>
+
+// TODO: 实现 arrayMax 函数
+// 返回指向数组中最大元素的指针
+// 如果 n == 0，返回 NULL
+int * arrayMax(int * array, int n) {
+  // 步骤提示：
+  // 1. 处理边界情况 (n == 0)
+  // 2. 用一个变量记录当前最大值的索引
+  // 3. 遍历数组，更新最大值索引
+  // 4. 返回最大值的地址 (array + index 或 &array[index])
+  
+  return NULL; // 修改这里
+}
+
+// 测试函数（已提供）
+void doTest(int * array, int n) {
+  printf("arrayMax(");
+  if (array == NULL) {
+    printf("NULL");
+  } else {
+    printf("{");
+    for (int i = 0; i < n; i++) {
+      printf("%d", array[i]);
+      if (i < n - 1) printf(", ");
+    }
+    printf("}");
+  }
+  printf(", %d) is \\n", n);
+  
+  int * p = arrayMax(array, n);
+  if (p == NULL) {
+    printf("NULL\\n");
+  } else {
+    printf("%d\\n", *p);
+  }
+}
+
+int main(void) {
+  int array1[] = {77, 33, 19, 99, 42, 6, 27, 4};
+  int array2[] = {-3, -42, -99, -1000, -999, -88, -77};
+  int array3[] = {425, 59, -3, 77, 0, 36};
+
+  doTest(array1, 8);
+  doTest(array2, 7);
+  doTest(array3, 6);
+  doTest(NULL, 0);
+  doTest(array1, 0);
+  
+  return EXIT_SUCCESS;
+}
+`
+    },
     descriptionZh: `# 数组最大值查找
 
 ## 任务描述
@@ -406,6 +694,12 @@ int * arrayMax(int * arr, size_t n);
     id: '08_testing',
     displayType: 'testgen',
     editableFiles: ['input.1', 'input.2', 'input.3', 'input.4'],
+    initialCode: {
+      'input.1': ``,
+      'input.2': ``,
+      'input.3': ``,
+      'input.4': ``
+    },
     descriptionZh: `# 黑盒测试生成
 
 ## 任务描述
@@ -444,12 +738,7 @@ $ ./isPrime-correct 4
 ## 学习目标
 - 黑盒测试思维
 - 边界条件分析
-- 测试用例设计
-
-## 提示
-- 考虑边界值：0, 1, 2, 负数
-- 考虑特殊素数：2 是唯一的偶素数
-- 考虑大数和小数`,
+- 测试用例设计`,
     learningGoals: ['黑盒测试', '边界分析', '测试设计'],
     hints: ['试试边界值', '2 是特殊的']
   },
@@ -458,6 +747,38 @@ $ ./isPrime-correct 4
     id: '15_tests_subseq',
     displayType: 'unittest',
     editableFiles: ['test-subseq.c'],
+    initialCode: {
+      'test-subseq.c': `#include <stdio.h>
+#include <stdlib.h>
+
+// 被测试函数的声明
+size_t maxSeq(int * array, size_t n);
+
+int main(void) {
+  // TODO: 编写测试用例
+  // 你需要测试各种情况来发现错误实现中的 bug
+  
+  // 示例测试 1: 正常递增数组
+  int array1[] = {1, 2, 3};
+  if (maxSeq(array1, 3) != 3) {
+    printf("Test 1 failed!\\n");
+    return EXIT_FAILURE;
+  }
+  
+  // TODO: 添加更多测试用例
+  // 考虑以下情况：
+  // - 空数组 (n == 0)
+  // - 单元素数组
+  // - 全部递减的数组
+  // - 混合递增递减的数组
+  // - 包含相等元素的数组
+  // - 包含负数的数组
+  
+  printf("All tests passed!\\n");
+  return EXIT_SUCCESS;
+}
+`
+    },
     descriptionZh: `# 单元测试编写 - maxSeq 函数
 
 ## 任务描述
@@ -492,25 +813,6 @@ size_t maxSeq(int * array, size_t n);
 
 3. **测试通过返回** \`EXIT_SUCCESS\`，**失败返回** \`EXIT_FAILURE\`
 
-## 示例框架
-\`\`\`c
-#include <stdio.h>
-#include <stdlib.h>
-
-size_t maxSeq(int * array, size_t n);
-
-int main(void) {
-    int arr1[] = {1, 2, 3};
-    if (maxSeq(arr1, 3) != 3) {
-        printf("Test 1 failed!\\n");
-        return EXIT_FAILURE;
-    }
-    // 更多测试...
-    printf("All tests passed!\\n");
-    return EXIT_SUCCESS;
-}
-\`\`\`
-
 ## 学习目标
 - 单元测试编写
 - 边界条件覆盖
@@ -523,6 +825,25 @@ int main(void) {
     id: '16_subseq',
     displayType: 'standard',
     editableFiles: ['maxSeq.c'],
+    initialCode: {
+      'maxSeq.c': `#include <stdlib.h>
+#include <stdio.h>
+
+// TODO: 实现 maxSeq 函数
+// 返回最长严格递增连续子序列的长度
+size_t maxSeq(int * array, size_t n) {
+  // 步骤提示：
+  // 1. 处理边界情况 (n == 0)
+  // 2. 用两个变量：max (记录最长长度) 和 current (当前序列长度)
+  // 3. 遍历数组，如果 array[i] > array[i-1]，current++
+  //    否则重置 current = 1
+  // 4. 每次更新 max = max(max, current)
+  // 5. 返回 max
+  
+  return 0; // 修改这里
+}
+`
+    },
     descriptionZh: `# 最长连续子序列
 
 ## 任务描述
@@ -537,6 +858,12 @@ size_t maxSeq(int * array, size_t n);
 - 例如：\`[1,2,3,1,2]\` 返回 3（序列 1,2,3）
 - 空数组返回 0
 
+## 示例
+\`\`\`
+输入: [1, 2, 1, 3, 5, 7, 2, 4, 6, 9]
+输出: 4  (序列 3,5,7 长度3 或 2,4,6,9 长度4)
+\`\`\`
+
 ## 学习目标
 - 序列处理算法
 - 边界条件处理
@@ -548,6 +875,12 @@ size_t maxSeq(int * array, size_t n);
     id: '10_gdb',
     displayType: 'gdb',
     editableFiles: ['input.txt'],
+    initialCode: {
+      'input.txt': `# 在这里输入你用 GDB 找到的两个秘密数字，每行一个
+# 第一行：第一轮的秘密数字
+# 第二行：第二轮的秘密数字
+`
+    },
     descriptionZh: `# GDB 猜数字游戏
 
 ## 任务描述
@@ -606,8 +939,6 @@ gdb ./game
 | \`break N\` | 在第 N 行设断点 |
 | \`continue\` / \`c\` | 继续执行到下一个断点 |
 | \`quit\` | 退出 GDB |
-- \`next\` / \`step\` - 单步执行
-- \`print var\` - 查看变量值
 
 ## 学习目标
 - GDB 基本使用
@@ -621,6 +952,128 @@ gdb ./game
     displayType: 'multi_file',
     editableFiles: ['cards.c', 'cards.h'],
     readonlyFiles: ['Makefile'],
+    initialCode: {
+      'cards.c': `#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include "cards.h"
+
+// TODO: 实现以下函数
+
+/**
+ * 验证卡牌的有效性
+ * - value 应在 2 到 VALUE_ACE (14) 之间
+ * - suit 应在 SPADES 到 CLUBS 之间
+ * 如果无效，使用 assert 触发错误
+ */
+void assert_card_valid(card_t c) {
+    // TODO: 实现验证逻辑
+}
+
+/**
+ * 将手牌等级转换为字符串
+ * 例如：STRAIGHT_FLUSH -> "STRAIGHT_FLUSH"
+ */
+const char * ranking_to_string(hand_ranking_t r) {
+    // TODO: 使用 switch-case 返回对应字符串
+    return "???";
+}
+
+/**
+ * 获取卡牌值的字母表示
+ * 2-9 -> '2'-'9', 10 -> '0', J -> 'J', Q -> 'Q', K -> 'K', A -> 'A'
+ */
+char value_letter(card_t c) {
+    // TODO: 实现转换逻辑
+    return '?';
+}
+
+/**
+ * 获取花色的字母表示
+ * SPADES -> 's', HEARTS -> 'h', DIAMONDS -> 'd', CLUBS -> 'c'
+ */
+char suit_letter(card_t c) {
+    // TODO: 实现转换逻辑
+    return '?';
+}
+
+/**
+ * 打印卡牌
+ * 格式："Xs" 其中 X 是值字母，s 是花色字母
+ */
+void print_card(card_t c) {
+    // TODO: 调用 value_letter 和 suit_letter，然后打印
+}
+
+/**
+ * 从字母表示创建卡牌
+ * value_let: '2'-'9', '0', 'J', 'Q', 'K', 'A'
+ * suit_let: 's', 'h', 'd', 'c'
+ */
+card_t card_from_letters(char value_let, char suit_let) {
+    card_t temp = {0, SPADES};
+    // TODO: 解析字符并设置 value 和 suit
+    return temp;
+}
+
+/**
+ * 从数字创建卡牌 (0-51)
+ * 0-3: 2s, 2h, 2d, 2c
+ * 4-7: 3s, 3h, 3d, 3c
+ * ...
+ */
+card_t card_from_num(unsigned c) {
+    card_t temp = {0, SPADES};
+    // TODO: 使用除法和取模计算 value 和 suit
+    return temp;
+}
+`,
+      'cards.h': `#ifndef CARD_H
+#define CARD_H
+
+#define VALUE_ACE 14
+#define VALUE_KING 13
+#define VALUE_QUEEN 12
+#define VALUE_JACK 11
+
+typedef enum {
+  SPADES,
+  HEARTS,
+  DIAMONDS,
+  CLUBS,
+  NUM_SUITS
+} suit_t;
+
+struct card_tag {
+  unsigned value;
+  suit_t suit;
+};
+typedef struct card_tag card_t;
+
+typedef enum {
+  STRAIGHT_FLUSH,
+  FOUR_OF_A_KIND,
+  FULL_HOUSE,
+  FLUSH,
+  STRAIGHT,
+  THREE_OF_A_KIND,
+  TWO_PAIR,
+  PAIR,
+  NOTHING
+} hand_ranking_t;
+
+// 函数声明
+card_t card_from_num(unsigned c);
+void assert_card_valid(card_t c);
+const char * ranking_to_string(hand_ranking_t r);
+char value_letter(card_t c);
+char suit_letter(card_t c);
+void print_card(card_t c);
+card_t card_from_letters(char value_let, char suit_let);
+
+#endif
+`
+    },
     descriptionZh: `# 扑克牌基础库实现
 
 ## 项目背景
@@ -687,6 +1140,20 @@ make poker   # 编译完整游戏
     id: 'c2prj2_testing',
     displayType: 'testgen',
     editableFiles: ['tests.txt'],
+    initialCode: {
+      'tests.txt': `# 扑克牌手牌评估测试用例
+# 格式: 手牌1; 手牌2
+# 每手牌由 7 张牌组成，用空格分隔
+# 牌面表示: 数值(2-9, 0=10, J, Q, K, A) + 花色(s, h, d, c)
+
+# 示例：
+# As Ks Qs Js 0s 9s 8s; Ah Kh Qh Jh 0h 9h 8h
+
+# TODO: 在下面添加你的测试用例
+# 提示：覆盖不同的牌型，特别注意边界情况
+
+`
+    },
     descriptionZh: `# 扑克牌手牌评估 - 测试用例编写
 
 ## 任务描述
@@ -1396,20 +1863,35 @@ typedef enum {
     id: 'code_swap_vars',
     displayType: 'standard',
     editableFiles: ['swap.c'],
+    initialCode: {
+      'swap.c': `#include <stdio.h>
+
+int main(void) {
+    int a, b;
+    scanf("%d %d", &a, &b);
+    
+    // TODO: 交换 a 和 b 的值
+    // 提示：可以使用第三个临时变量 temp
+    
+    printf("a=%d, b=%d\\n", a, b);
+    return 0;
+}
+`
+    },
     descriptionZh: `# 交换两个变量的值
 
 ## 任务描述
 编写代码，交换两个变量 a 和 b 的值。
 
 ## 具体要求
-1. 给定两个整数变量 a 和 b
+1. 从输入读取两个整数 a 和 b
 2. 使用第三个临时变量 temp，交换它们的值
-3. 打印交换后的结果
+3. 打印交换后的结果，格式为 \`a=值, b=值\`
 
 ## 示例
 \`\`\`
-交换前: a=5, b=10
-交换后: a=10, b=5
+输入: 5 10
+输出: a=10, b=5
 \`\`\`
 
 ## 提示
@@ -1424,6 +1906,20 @@ typedef enum {
     id: 'code_grade_judge',
     displayType: 'standard',
     editableFiles: ['grade.c'],
+    initialCode: {
+      'grade.c': `#include <stdio.h>
+
+int main(void) {
+    int score;
+    scanf("%d", &score);
+    
+    // TODO: 根据 score 输出对应的等级 (A/B/C/D/F)
+    // 90-100: A, 80-89: B, 70-79: C, 60-69: D, 0-59: F
+    
+    return 0;
+}
+`
+    },
     descriptionZh: `# 成绩等级判断
 
 ## 任务描述
@@ -1657,6 +2153,25 @@ int isPrime(int n);
     id: 'code_swap_ptr',
     displayType: 'standard',
     editableFiles: ['swap_ptr.c'],
+    initialCode: {
+      'swap_ptr.c': `#include <stdio.h>
+
+// TODO: 实现 swap 函数，通过指针交换两个变量的值
+void swap(int *a, int *b) {
+    // 在这里实现
+}
+
+int main(void) {
+    int x, y;
+    scanf("%d %d", &x, &y);
+    
+    swap(&x, &y);
+    
+    printf("x=%d, y=%d\\n", x, y);
+    return 0;
+}
+`
+    },
     descriptionZh: `# 用指针交换变量
 
 ## 任务描述
@@ -1671,10 +2186,9 @@ void swap(int *a, int *b);
 调用后，\`a\` 和 \`b\` 指向的值被交换。
 
 ## 示例
-\`\`\`c
-int x = 5, y = 10;
-swap(&x, &y);
-// 现在 x=10, y=5
+\`\`\`
+输入: 5 10
+输出: x=10, y=5
 \`\`\`
 
 ## 思考题
@@ -1690,6 +2204,34 @@ swap(&x, &y);
     id: 'code_array_reverse',
     displayType: 'standard',
     editableFiles: ['reverse.c'],
+    initialCode: {
+      'reverse.c': `#include <stdio.h>
+
+// TODO: 实现 reverse 函数，将数组原地反转
+void reverse(int arr[], int n) {
+    // 在这里实现
+}
+
+int main(void) {
+    int n;
+    scanf("%d", &n);
+    
+    int arr[100];
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+    
+    reverse(arr, n);
+    
+    for (int i = 0; i < n; i++) {
+        if (i > 0) printf(" ");
+        printf("%d", arr[i]);
+    }
+    printf("\\n");
+    return 0;
+}
+`
+    },
     descriptionZh: `# 数组反转
 
 ## 任务描述
@@ -1705,8 +2247,10 @@ void reverse(int arr[], int n);
 
 ## 示例
 \`\`\`
-输入: [1, 2, 3, 4, 5]
-输出: [5, 4, 3, 2, 1]
+输入:
+5
+1 2 3 4 5
+输出: 5 4 3 2 1
 \`\`\`
 
 ## 提示
@@ -1998,11 +2542,16 @@ export async function getProblemContent(problemId: string) {
   const editableFilenames = meta?.editableFiles || [];
   const initialFiles: Record<string, string> = {};
   
-    for (const filename of editableFilenames) {
-    try {
-      initialFiles[filename] = await fs.readFile(path.join(dirPath, filename), 'utf-8');
-    } catch {
-      initialFiles[filename] = getDefaultContent(filename);
+  for (const filename of editableFilenames) {
+    // 优先级：1. meta.initialCode 配置  2. 文件系统  3. 默认模板
+    if (meta?.initialCode && meta.initialCode[filename]) {
+      initialFiles[filename] = meta.initialCode[filename];
+    } else {
+      try {
+        initialFiles[filename] = await fs.readFile(path.join(dirPath, filename), 'utf-8');
+      } catch {
+        initialFiles[filename] = getDefaultContent(filename);
+      }
     }
   }
 
