@@ -26,6 +26,7 @@ export interface ProblemMeta {
   descriptionZh: string;     // 中文描述
   learningGoals?: string[];  // 学习目标
   hints?: string[];          // 提示
+  initialCode?: Record<string, string>;  // 初始代码模板 { "filename": "code content" }
 }
 
 // ============================================================
