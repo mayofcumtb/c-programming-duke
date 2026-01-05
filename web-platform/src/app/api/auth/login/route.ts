@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const validResult = await prisma.$queryRaw<{ valid: boolean }[]>`
       SELECT (password_hash = crypt(${password}, password_hash)) as valid
       FROM users
-      WHERE id = ${user.id}::uuid
+      WHERE id::text = ${user.id}
     `;
 
     if (!validResult[0]?.valid) {
@@ -104,7 +104,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("[Auth] Login error:", error);
-    return NextResponse.json({ error: "登录失败" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "未知错误";
+    return NextResponse.json({ error: "登录失败", detail: errorMessage }, { status: 500 });
   }
 }
 

@@ -35,7 +35,7 @@ export async function POST(
     await prisma.$executeRaw`
       UPDATE users 
       SET password_hash = crypt(${newPassword}, gen_salt('bf'))
-      WHERE id = ${id}::uuid
+      WHERE id::text = ${id}
     `;
 
     // 删除该用户的所有会话（强制重新登录）

@@ -54,15 +54,17 @@ export async function POST(request: NextRequest) {
 
     // 创建用户（使用 PostgreSQL 的 crypt 函数加密密码）
     const userResult = await prisma.$queryRaw<{ id: string }[]>`
-      INSERT INTO users (username, student_id, display_name, class_name, password_hash, role, is_active)
+      INSERT INTO users (id, username, student_id, display_name, class_name, password_hash, role, is_active, created_at)
       VALUES (
+        gen_random_uuid(),
         ${username},
         ${studentId || null},
         ${displayName || null},
         ${className || null},
         crypt(${password}, gen_salt('bf')),
         ${role}::user_role,
-        TRUE
+        TRUE,
+        NOW()
       )
       RETURNING id
     `;
