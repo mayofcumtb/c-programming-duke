@@ -2,7 +2,8 @@
 
 import CodeEditor from "@/components/CodeEditor";
 import ConsolePanel from "@/components/ConsolePanel";
-import { ChevronLeft, ChevronRight, Play, Save, BookOpen, FileCode, Lightbulb, Eye, CloudOff, Cloud, Loader2 } from "lucide-react";
+import { NoScriptDetector, useJSStatusMonitor } from "@/components/NoScriptDetector";
+import { ChevronLeft, ChevronRight, Play, Save, BookOpen, FileCode, Lightbulb, Eye, CloudOff, Cloud, Loader2, RotateCcw, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
@@ -76,6 +77,63 @@ export default function IDEWorkspace({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isLoadedRef = useRef(false);
+
+  // 作弊检测状态
+  const [cheatCount, setCheatCount] = useState(0);
+  const [showCheatWarning, setShowCheatWarning] = useState(false);
+  const { jsWasDisabled } = useJSStatusMonitor();
+
+  // 代码重置功能
+  const resetCode = useCallback(() => {
+    setFiles(initialFiles);
+    setLogs(["⚠️ 代码已重置为初始状态"]);
+    setCheatCount(0);
+    
+    // 删除草稿
+    fetch("/api/code/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ problemId, files: initialFiles }),
+    }).catch(() => {});
+    
+    // 记录重置事件
+    fetch("/api/analytics/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "code_reset_due_to_cheat",
+        data: { problemId, timestamp: Date.now() },
+      }),
+    }).catch(() => {});
+  }, [initialFiles, problemId]);
+
+  // 处理作弊检测回调
+  const handleCheatDetected = useCallback((type: string, detail: string) => {
+    setCheatCount((prev) => {
+      const newCount = prev + 1;
+      if (newCount >= 3) {
+        setShowCheatWarning(true);
+      }
+      return newCount;
+    });
+  }, []);
+
+  // 处理强制重置
+  const handleResetRequired = useCallback(() => {
+    setShowCheatWarning(true);
+    setTimeout(() => {
+      resetCode();
+      setShowCheatWarning(false);
+    }, 2000);
+  }, [resetCode]);
+
+  // 检测到 JS 被禁用后重新启用
+  useEffect(() => {
+    if (jsWasDisabled) {
+      setLogs((prev) => [...prev, "⚠️ 检测到异常操作，请勿尝试绕过系统限制"]);
+      setCheatCount((prev) => prev + 2);
+    }
+  }, [jsWasDisabled]);
 
   // 加载保存的代码
   useEffect(() => {
@@ -341,6 +399,21 @@ export default function IDEWorkspace({
   // ============================================================
   return (
     <div className="flex h-screen flex-col bg-slate-900">
+      {/* NoScript 检测 */}
+      <NoScriptDetector />
+
+      {/* 作弊警告覆盖层 */}
+      {showCheatWarning && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80">
+          <div className="rounded-xl bg-red-900 p-8 text-center shadow-2xl border-2 border-red-500">
+            <ShieldAlert className="mx-auto h-16 w-16 text-red-400 mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">检测到作弊行为</h2>
+            <p className="text-red-200 mb-4">您的代码将被重置为初始状态</p>
+            <div className="animate-spin h-6 w-6 border-2 border-red-400 border-t-transparent rounded-full mx-auto" />
+          </div>
+        </div>
+      )}
+
       {/* Top Bar */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-700 bg-slate-800 px-4">
         <div className="flex items-center gap-4">
@@ -356,9 +429,31 @@ export default function IDEWorkspace({
           <span className="rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-300">
             {kind === "quiz" ? "测验" : displayType === "reading" ? "阅读理解" : displayType === "testgen" ? "测试生成" : displayType === "multi_file" ? "多文件" : "代码编写"}
           </span>
+          {/* 作弊计数警告 */}
+          {cheatCount > 0 && (
+            <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-xs text-red-400 flex items-center gap-1">
+              <ShieldAlert className="h-3 w-3" />
+              警告 {cheatCount}/2
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
+          {/* 重置代码按钮 */}
+          {kind !== "quiz" && (kind as string) !== "intro" && (
+            <button
+              onClick={() => {
+                if (confirm("确定要重置代码吗？这将丢失所有修改！")) {
+                  resetCode();
+                }
+              }}
+              className="flex items-center gap-1 rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-600 transition-colors"
+              title="重置为初始代码"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              重置
+            </button>
+          )}
           {kind !== "quiz" && (kind as string) !== "intro" && (
             <div className="flex items-center gap-2 text-xs text-slate-400">
               {saveStatus === "saving" && (
@@ -581,6 +676,9 @@ export default function IDEWorkspace({
                       }
                     }}
                     readOnly={isCurrentFileReadonly}
+                    problemId={problemId}
+                    onCheatDetected={handleCheatDetected}
+                    onResetRequired={handleResetRequired}
                   />
                 </div>
               </>

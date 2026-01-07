@@ -1618,14 +1618,14 @@ def judge_io_test(config, work_dir, resource_dir, problem_id):
 
 
 def judge_standard(work_dir, resource_dir, problem_id):
-    """通用判题（fallback）- 未配置的题目只验证编译，不给满分"""
+    """通用判题（fallback）- 未配置的题目编译运行后需要联系管理员配置"""
     logs = []
-    logs.append("⚠️ 该题目尚未配置自动评分，仅验证编译")
+    logs.append("⚠️ 该题目尚未配置自动评分规则")
     
     # 查找 .c 文件
     c_files = glob.glob(os.path.join(work_dir, "*.c"))
     if not c_files:
-        return {"status": "runtime_error", "score": 0, "logs": ["未找到 .c 文件"]}
+        return {"status": "wrong_answer", "score": 0, "logs": ["未找到 .c 文件"]}
     
     src_file = os.path.basename(c_files[0])
     
@@ -1648,10 +1648,11 @@ def judge_standard(work_dir, resource_dir, problem_id):
     logs.append("--- 输出 ---")
     logs.append(run_res["stdout"])
     
-    # 未配置的题目只给编译通过分数，需要人工评阅
+    # 未配置的题目不给分，提示联系管理员
     logs.append("")
-    logs.append("📝 此题目需要人工评阅，暂时给予部分分数")
-    return {"status": "pending", "score": 10, "logs": logs}
+    logs.append("❌ 此题目暂未配置自动判题规则，请联系管理员。")
+    logs.append("📧 请告知管理员题目 ID: {}".format(problem_id))
+    return {"status": "wrong_answer", "score": 0, "logs": logs}
 
 
 # ============================================================

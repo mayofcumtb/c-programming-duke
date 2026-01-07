@@ -1,27 +1,97 @@
 "use client";
 
 import Editor, { OnMount } from "@monaco-editor/react";
-import { AlertTriangle, Lock } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, Lock, ShieldAlert } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface CodeEditorProps {
   initialValue?: string;
   value?: string;
   onChange?: (value: string | undefined) => void;
   readOnly?: boolean;
+  problemId?: string;
+  onCheatDetected?: (type: string, detail: string) => void;
+  onResetRequired?: () => void;
 }
+
+// 作弊检测阈值
+const SUSPICIOUS_CHAR_THRESHOLD = 50; // 单次增加超过50字符视为可疑
+const SUSPICIOUS_LINE_THRESHOLD = 5;  // 单次增加超过5行视为可疑
 
 export default function CodeEditor({ 
   initialValue = "", 
   value,
   onChange,
-  readOnly = false 
+  readOnly = false,
+  problemId,
+  onCheatDetected,
+  onResetRequired
 }: CodeEditorProps) {
   // 使用 value 作为受控值，如果提供了 value 则使用 value，否则使用 initialValue
   const editorValue = value !== undefined ? value : initialValue;
   const [warning, setWarning] = useState<string | null>(null);
+  const [cheatWarning, setCheatWarning] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const cleanupMonacoDomListenersRef = useRef<(() => void) | null>(null);
+  
+  // 跟踪代码变化用于检测可疑粘贴
+  const lastContentRef = useRef<string>(editorValue);
+  const lastChangeTimeRef = useRef<number>(Date.now());
+  const suspiciousCountRef = useRef<number>(0);
+
+  // 报告作弊行为
+  const reportCheat = useCallback((type: string, detail: string) => {
+    console.warn(`[AntiCheat] ${type}: ${detail}`);
+    onCheatDetected?.(type, detail);
+    
+    // 发送到服务器记录
+    fetch('/api/analytics/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventType: 'cheat_detected',
+        data: { type, detail, problemId, timestamp: Date.now() }
+      })
+    }).catch(() => {});
+  }, [onCheatDetected, problemId]);
+
+  // 检测可疑的代码变化（可能是外部粘贴）
+  const detectSuspiciousChange = useCallback((newContent: string) => {
+    const oldContent = lastContentRef.current;
+    const timeDiff = Date.now() - lastChangeTimeRef.current;
+    
+    // 计算变化量
+    const charDiff = newContent.length - oldContent.length;
+    const newLines = newContent.split('\n').length;
+    const oldLines = oldContent.split('\n').length;
+    const lineDiff = newLines - oldLines;
+    
+    // 短时间内增加大量内容 = 可疑粘贴
+    if (timeDiff < 500 && charDiff > SUSPICIOUS_CHAR_THRESHOLD) {
+      suspiciousCountRef.current++;
+      reportCheat('suspicious_paste', `短时间内增加 ${charDiff} 字符`);
+      
+      if (suspiciousCountRef.current >= 2) {
+        setCheatWarning("检测到多次可疑操作！代码将被重置。");
+        onResetRequired?.();
+      } else {
+        setWarning("检测到异常输入！请手写代码。再次违规将重置代码！");
+      }
+      return true;
+    }
+    
+    // 单次增加大量行 = 可疑粘贴
+    if (timeDiff < 1000 && lineDiff > SUSPICIOUS_LINE_THRESHOLD) {
+      suspiciousCountRef.current++;
+      reportCheat('suspicious_multiline', `短时间内增加 ${lineDiff} 行`);
+      setWarning("检测到异常输入！请逐行编写代码。");
+      return true;
+    }
+    
+    lastContentRef.current = newContent;
+    lastChangeTimeRef.current = Date.now();
+    return false;
+  }, [reportCheat, onResetRequired]);
 
   // 防作弊：清除警告
   useEffect(() => {
@@ -30,6 +100,14 @@ export default function CodeEditor({
       return () => clearTimeout(timer);
     }
   }, [warning]);
+
+  // 清除严重警告
+  useEffect(() => {
+    if (cheatWarning) {
+      const timer = setTimeout(() => setCheatWarning(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [cheatWarning]);
 
   useEffect(() => {
     return () => {
@@ -198,12 +276,29 @@ export default function CodeEditor({
         </div>
       )}
 
+      {/* 严重作弊警告 */}
+      {cheatWarning && (
+        <div className="absolute top-14 left-1/2 z-50 -translate-x-1/2 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-bold text-white shadow-lg border-2 border-orange-400">
+            <ShieldAlert className="h-5 w-5" />
+            {cheatWarning}
+          </div>
+        </div>
+      )}
+
       <div className="h-full">
         <Editor
           height="100%"
           defaultLanguage="c"
           value={editorValue}
-          onChange={readOnly ? undefined : onChange}
+          onChange={(newValue) => {
+            if (readOnly) return;
+            // 检测可疑变化
+            if (newValue) {
+              detectSuspiciousChange(newValue);
+            }
+            onChange?.(newValue);
+          }}
           onMount={handleEditorDidMount}
           theme="vs-dark"
           options={{
